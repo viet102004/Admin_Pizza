@@ -16,6 +16,10 @@
     <div class="nav-tabs">
       <div class="nav-tab active" data-tab="dashboard">Quản lý người dùng</div>
       <div class="nav-tab" data-tab="orders">Quản lý đơn hàng</div>
+      <div class="nav-tab" data-tab="products">Quản lý sản phẩm</div>
+      <div class="nav-tab" data-tab="banners">Quản lý banner</div>
+      <div class="nav-tab" data-tab="coupons">Quản lý mã giảm giá</div>
+
     </div>
 
     <!-- Người dùng -->
@@ -34,28 +38,163 @@
     </div>
 
     <!-- Đơn hàng -->
-    <div class="tab-content" id="orders">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="pendingOrders">0</div>
-          <div class="stat-label">Đơn chưa duyệt</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="approvedOrders">0</div>
-          <div class="stat-label">Đơn đã duyệt</div>
-        </div>
-      </div>
+<div class="tab-content" id="orders">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="pendingOrders">0</div><div class="stat-label">Đơn chưa duyệt</div></div>
+    <div class="stat-card"><div class="stat-number" id="preparingOrders">0</div><div class="stat-label">Đang chuẩn bị</div></div>
+    <div class="stat-card"><div class="stat-number" id="shippingOrders">0</div><div class="stat-label">Đang giao</div></div>
+    <div class="stat-card"><div class="stat-number" id="completedOrders">0</div><div class="stat-label">Hoàn thành</div></div>
+    <div class="stat-card"><div class="stat-number" id="cancelledOrders">0</div><div class="stat-label">Đã huỷ</div></div>
+  </div>
 
-      <div class="content-card">
-        <h3>🕒 Đơn hàng chưa duyệt</h3>
-        <div id="pendingOrderList"></div>
-      </div>
+  <div class="content-card"><h3>🕒 Đơn chưa duyệt</h3><div id="pendingOrderList"></div></div>
+  <div class="content-card"><h3>🔧 Đang chuẩn bị</h3><div id="preparingOrderList"></div></div>
+  <div class="content-card"><h3>🚚 Đang giao</h3><div id="shippingOrderList"></div></div>
+  <div class="content-card"><h3>🎉 Hoàn thành</h3><div id="completedOrderList"></div></div>
+  <div class="content-card"><h3>❌ Đã huỷ</h3><div id="cancelledOrderList"></div></div>
+</div>
 
+
+<div class="tab-content" id="products">
       <div class="content-card">
-        <h3>✅ Đơn hàng đã duyệt</h3>
-        <div id="approvedOrderList"></div>
+        <div class="product-header">
+          <h3>🛒 Danh sách sản phẩm</h3>
+          <button class="add-product-btn" onclick="showAddProductForm()">+ Thêm sản phẩm</button>
+        </div>
+        <div id="productList" class="product-grid"></div>
       </div>
     </div>
+
+<div class="tab-content" id="banners">
+  <div class="content-card">
+    <h3>🖼️ Danh sách banner</h3>
+      <!-- Nút Thêm banner -->
+   <div style="text-align: right; margin-bottom: 16px;">
+  <button class="add-banner-btn" onclick="showAddBannerForm()">➕ Thêm banner</button>
+</div>
+
+    <div id="bannerList"></div>
+    <!-- Form thêm banner -->
+<!-- Form thêm banner đẹp -->
+<div id="addBannerForm" class="modal" style="display: none;">
+  <div class="modal-content form-large" style="max-width: 500px;">
+    <h2 style="text-align:center;">🖼️ Thêm banner mới</h2>
+
+    <div class="form-group">
+      <label for="addBannerTitle">📝 Tiêu đề</label>
+      <input type="text" id="addBannerTitle" placeholder="Nhập tiêu đề banner" />
+    </div>
+
+    <div class="form-group">
+      <label for="addBannerProductId">🔢 Mã sản phẩm</label>
+      <input type="number" id="addBannerProductId" placeholder="Nhập mã sản phẩm" />
+    </div>
+
+    <div class="form-group">
+      <label for="addBannerImage">🖼️ Hình ảnh</label>
+      <input type="file" id="addBannerImage" accept="image/*" />
+    </div>
+
+    <div class="form-actions" style="justify-content: space-between;">
+      <button class="submit-btn" onclick="submitNewBanner()">✅ Thêm</button>
+      <button class="cancel-btn" onclick="closeAddBannerForm()">❌ Hủy</button>
+    </div>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+  <!-- Modal thêm sản phẩm -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>➕ Thêm sản phẩm mới</h3>
+        <span class="close" onclick="closeAddProductModal()">&times;</span>
+      </div>
+      <form id="addProductForm">
+        <div class="form-group">
+          <label>Tên sản phẩm:</label>
+          <input type="text" id="productName" required placeholder="Nhập tên sản phẩm">
+        </div>
+        <div class="form-group">
+          <label>Giá cơ bản:</label>
+          <input type="number" id="productPrice" required placeholder="Nhập giá (VNĐ)">
+        </div>
+        <div class="form-group">
+          <label>Mã danh mục:</label>
+          <input type="number" id="productCategory" required placeholder="Nhập mã">
+        </div>
+        <div class="form-group">
+          <label>Mô tả:</label>
+          <textarea id="productDescription" rows="4" placeholder="Nhập mô tả sản phẩm"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Hình ảnh:</label>
+          <input type="file" id="productImage" accept="image/*" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" onclick="closeAddProductModal()" class="btn-cancel">Hủy</button>
+          <button type="submit" class="btn-submit">Thêm sản phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- ✅ Modal nằm ngoài phần tab để đảm bảo overlay toàn màn hình -->
+<div id="discountForm" class="modal" style="display: none;">
+  <div class="modal-content form-large">
+    <h2 style="margin-bottom: 16px;">➕ Thêm mã giảm giá</h2>
+    
+    <label for="discountCode">Mã code</label>
+    <input type="text" id="discountCode" />
+
+    <label for="discountType">Loại giảm giá</label>
+    <select id="discountType">
+      <option value="">-- Chọn loại --</option>
+      <option value="phan_tram">Phần trăm</option>
+      <option value="co_dinh">Cố định</option>
+    </select>
+
+    <label for="discountValue">Giá trị giảm</label>
+    <input type="number" id="discountValue" />
+
+    <label for="discountStart">Ngày bắt đầu</label>
+    <input type="date" id="discountStart" lang="en-CA" />
+
+    <label for="discountEnd">Ngày kết thúc</label>
+    <input type="date" id="discountEnd" lang="en-CA" />
+
+    <label for="discountMinValue">Giá trị đơn hàng tối thiểu</label>
+    <input type="number" id="discountMinValue" />
+
+    <label for="discountMaxUse">Số lần sử dụng tối đa</label>
+    <input type="number" id="discountMaxUse" />
+
+    <div class="form-actions">
+      <button onclick="submitDiscount()">✅ Thêm</button>
+      <button onclick="closeDiscountForm()">❌ Cancel</button>
+    </div>
+    
+  </div>
+</div>
+
+
+<!-- ✅ Tab mã giảm giá -->
+<div class="tab-content" id="coupons">
+  <div class="content-card">
+    <div style="text-align: right; margin-bottom: 12px;">
+    <button class="add-discount-btn styled" onclick="showAddDiscountForm()">➕ Thêm mã giảm giá</button>
+
+    </div>
+
+    <h3>🎟️ Danh sách mã giảm giá</h3>
+    <div id="couponList" style="margin-top: 12px;"></div>
+  </div>
+</div>
+
+
+
   </div>
 
   <button id="logoutBtn" class="logout-btn">🚪 Đăng xuất</button>
