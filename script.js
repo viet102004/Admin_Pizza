@@ -122,9 +122,57 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     if (tabName === 'coupons') {
   fetchAndRenderCoupons();
     }
-
+    if (tabName === 'revenue') {
+      fetchAndRenderRevenue(); // 👈 Gọi hàm doanh thu
+    }
   });
 });
+function fetchAndRenderRevenue() {
+  const token = localStorage.getItem("authToken");
+
+  fetch("https://related-burro-selected.ngrok-free.app/tatCaDonHang", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "ngrok-skip-browser-warning": "true"
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      const orders = Array.isArray(data.don_hang) ? data.don_hang : [];
+      const completedOrders = orders.filter(o => o.trang_thai === "hoan_thanh");
+
+      let total = 0;
+      completedOrders.forEach(order => {
+        total += parseFloat(order.tong_tien_cuoi_cung || 0);
+      });
+
+      document.getElementById("revenueTotal").textContent = 
+        `💰 Tổng doanh thu: ${total.toLocaleString("vi-VN")} VNĐ`;
+
+      const container = document.getElementById("completedRevenueOrders");
+      container.innerHTML = "";
+
+      completedOrders.forEach(order => {
+        const info = order.thong_tin_giao_hang || {};
+        const item = document.createElement("div");
+        item.className = "order-row";
+
+        item.innerHTML = `
+          <div class="order-info">
+            <div>🧾 Đơn #${order.ma_don_hang}</div>
+            <div>👤 ${info.ten_nguoi_nhan || ""}</div>
+            <div>💸 ${parseFloat(order.tong_tien_cuoi_cung).toLocaleString("vi-VN")} VNĐ</div>
+          </div>
+        `;
+
+        container.appendChild(item);
+      });
+    })
+    .catch(err => {
+      console.error("❌ Lỗi khi tải doanh thu:", err);
+    });
+}
+
 function fetchAndRenderProducts() {
   const token = localStorage.getItem("authToken");
 
@@ -232,15 +280,17 @@ function renderOrderList(containerId, orders, nextStatus) {
       `;
     }
 
-    item.innerHTML = `
-      <div class="order-info">
-        <div class="order-id">🧾 <strong>Đơn #${order.ma_don_hang}</strong></div>
-        <div>👤 <strong>Người nhận:</strong> ${info.ten_nguoi_nhan || "?"}</div>
-        <div>📞 <strong>SĐT:</strong> ${info.so_dien_thoai || "?"}</div>
-        <div>📍 <strong>Địa chỉ:</strong> ${info.dia_chi || "?"}</div>
-      </div>
-      ${actions}
-    `;
+   item.innerHTML = `
+  <div class="order-info">
+    <div class="order-id">🧾 <strong>Đơn #${order.ma_don_hang}</strong></div>
+    <div>👤 <strong>Người nhận:</strong> ${info.ten_nguoi_nhan || "?"}</div>
+    <div>📞 <strong>SĐT:</strong> ${info.so_dien_thoai || "?"}</div>
+    <div>📍 <strong>Địa chỉ:</strong> ${info.dia_chi || "?"}</div>
+    <div>💵 <strong>Tổng tiền:</strong> ${Number(order.tong_tien_cuoi_cung).toLocaleString("vi-VN")} VNĐ</div>
+  </div>
+  ${actions}
+`;
+
     container.appendChild(item);
   });
 }
@@ -415,8 +465,6 @@ function fetchAndRenderBanners() {
         const item = document.createElement("div");
         item.className = "banner-row";
 
-        const imageUrl = "https://related-burro-selected.ngrok-free.app" + banner.url_hinh_anh;
-
  item.innerHTML = `
   <div class="banner-info">
     <div class="banner-meta">
@@ -424,7 +472,7 @@ function fetchAndRenderBanners() {
         🆔 <strong>Mã banner:</strong> ${banner.ma_banner}<br/>
         📦 <strong>Mã sản phẩm:</strong> ${banner.ma_san_pham}<br/>
         🏷️ <strong>Tiêu đề:</strong> ${banner.tieu_de || "Không có"}<br/>
-        <img src="${imageUrl}" alt="Banner" class="banner-img">
+     
       </div>
       <div class="banner-actions">
         <input type="file" accept="image/*" id="bannerImageInput-${banner.ma_banner}" style="display: none" />
